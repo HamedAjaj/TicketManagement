@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TicketManagement.DBContext;
+using TicketManagement.Infrastructure.DBContext;
 
 #nullable disable
 
@@ -22,29 +22,14 @@ namespace TicketManagement.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("TicketManagement.Entities.Ticket", b =>
+            modelBuilder.Entity("TicketManagement.Domain.Entities.Ticket", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ColorCode")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("CreationDateTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("District")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Governorate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -57,6 +42,37 @@ namespace TicketManagement.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tickets");
+                });
+
+            modelBuilder.Entity("TicketManagement.Domain.Entities.Ticket", b =>
+                {
+                    b.OwnsOne("TicketManagement.Domain.ValueObjects.Address", "Address", b1 =>
+                        {
+                            b1.Property<Guid>("TicketId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("City")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("District")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Governorate")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("TicketId");
+
+                            b1.ToTable("Tickets");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TicketId");
+                        });
+
+                    b.Navigation("Address")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

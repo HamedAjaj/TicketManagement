@@ -12,8 +12,8 @@ using TicketManagement.Infrastructure.DBContext;
 namespace TicketManagement.Migrations
 {
     [DbContext(typeof(TicketDbContext))]
-    [Migration("20250522180515_addColorCode")]
-    partial class addColorCode
+    [Migration("20250524161638_NewTableforcolor")]
+    partial class NewTableforcolor
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,30 +25,14 @@ namespace TicketManagement.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("TicketManagement.Entities.Ticket", b =>
+            modelBuilder.Entity("TicketManagement.Domain.Entities.Ticket", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ColorCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("CreationDateTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("District")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Governorate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -61,6 +45,37 @@ namespace TicketManagement.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tickets");
+                });
+
+            modelBuilder.Entity("TicketManagement.Domain.Entities.Ticket", b =>
+                {
+                    b.OwnsOne("TicketManagement.Domain.ValueObjects.Address", "Address", b1 =>
+                        {
+                            b1.Property<Guid>("TicketId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("City")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("District")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Governorate")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("TicketId");
+
+                            b1.ToTable("Tickets");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TicketId");
+                        });
+
+                    b.Navigation("Address")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

@@ -1,9 +1,11 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using TicketManagement.DBContext;
-using TicketManagement.Filters;
-using TicketManagement.PipeLineBehavior;
+using TicketManagement.API.Filters;
+using TicketManagement.API.PipeLineBehavior;
+using TicketManagement.Infrastructure.DBContext;
+using TicketManagement.Infrastructure.Repository.Implementation;
+using TicketManagement.Infrastructure.Repository.Interface;
 using TicketManagement.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,11 +19,10 @@ builder.Services.AddHostedService<AutoHandleService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddMediatR(option => option.RegisterServicesFromAssembly(typeof(Program).Assembly));
-// prefered to be before validators
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPipeLine<,>));
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
-
 builder.Services.AddDbContext<TicketDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 // this is if I want to make global filter
@@ -29,7 +30,7 @@ builder.Services.AddControllers(
     options => options.Filters.Add(new HandleErrorAttribute()));
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigins", policy =>
+    options.AddPolicy("TicketOrigin", policy =>
     {
         policy.WithOrigins("http://localhost:4200")  
               .AllowAnyHeader() 
@@ -52,7 +53,7 @@ if (app.Environment.IsDevelopment())
     // app.MapOpenApi();
 }
 
-app.UseCors("AllowSpecificOrigins");
+app.UseCors("TicketOrigin");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

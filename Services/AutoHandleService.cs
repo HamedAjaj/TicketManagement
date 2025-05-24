@@ -1,5 +1,6 @@
 ﻿using System;
-using TicketManagement.DBContext;
+using TicketManagement.Infrastructure.DBContext;
+using TicketManagement.Infrastructure.Repository.Interface;
 
 namespace TicketManagement.Services
 {
@@ -17,21 +18,22 @@ namespace TicketManagement.Services
             while (!stoppingToken.IsCancellationRequested)
             {
                 using var scope = _serviceProvider.CreateScope();
-                var context = scope.ServiceProvider.GetRequiredService<TicketDbContext>();
+                var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
 
-                var ticketsToHandle = context.Tickets
-                    .Where(t => t.Status == "New" && t.CreationDateTime <= DateTime.UtcNow.AddMinutes(-60))
-                    .ToList();
+                var cutoffTime = DateTime.UtcNow.AddMinutes(-60);
+                var ticketsToHandle = ticketRepository.GetTicketsToHandle(cutoffTime);
 
                 foreach (var ticket in ticketsToHandle)
                 {
-                    ticket.Status = "Handled";
+                    ticket.UpdateStatus("Handled");
                 }
 
-                await context.SaveChangesAsync(stoppingToken);
+                await ticketRepository.SaveChangesAsync(stoppingToken);
+
                 await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
         }
     }
+
 
 }
