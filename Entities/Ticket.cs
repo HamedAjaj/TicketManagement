@@ -6,7 +6,6 @@ namespace TicketManagement.Entities
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public DateTime CreationDateTime { get; set; } = DateTime.UtcNow;
-        [Phone]
         public string PhoneNumber { get; set; }
         public string Governorate { get; set; }
         public string City { get; set; }

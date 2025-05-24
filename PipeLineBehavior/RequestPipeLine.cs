@@ -1,8 +1,9 @@
 ﻿using FluentValidation;
 using MediatR;
+using TicketManagement.PipeLineBehavior.Response;
 
 namespace TicketManagement.PipeLineBehavior
-{  
+{
     // Request PipeLine to check validation and goto next pipe to post or next based on validation
     public class RequestPipeLine<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
         where TRequest : IRequest<TResponse>
@@ -17,12 +18,21 @@ namespace TicketManagement.PipeLineBehavior
             var context = new ValidationContext<TRequest>(request);
             var failures = _validators.Select(validator => validator.Validate(context))
                 .SelectMany(Omany => Omany.Errors)
-                .Where(ObjCondition=> ObjCondition != null)
+                .Where(ObjCondition => ObjCondition != null)
                 .ToList();
 
+
             if (failures.Any())
-                throw new ValidationException(failures);
-            
+            {
+                var errorResponse = new ResponseWrapper<object>
+                {
+                    Success = false,
+                    Errors = failures.Select(f => $"{f.PropertyName}: {f.ErrorMessage}").ToList()
+                };
+
+                return Task.FromResult((TResponse)(object)errorResponse);
+            }
+
             return next();
         }
     }

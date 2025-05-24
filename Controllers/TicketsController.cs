@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TicketManagement.Commands.Model;
 using TicketManagement.Queries.Model;
@@ -16,8 +17,11 @@ namespace TicketManagement.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateTicket([FromBody] CreateTicketCommand command)
         {
-            var id = await _mediator.Send(command);
-            return Ok(id);
+            var result = await _mediator.Send(command);
+            if (!result.Success)
+                return BadRequest(result.Errors);
+
+            return Ok(result.Data); 
         }
 
 
