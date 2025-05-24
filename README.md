@@ -1,5 +1,5 @@
 # TicketManagement
- ## This project follows Domain-Driven Design (DDD) principles 
+ ## This project follows Domain-Driven Design (DDD)  
  ### and implements a Clean Architecture, structured into four distinct layers 
  #### 1- Domain
  #### 2- Application 
